@@ -52,7 +52,7 @@ console.log(rectangle.calcSize());
 class Person {
     private _firstName = "";
 
-    get firstName() {
+    get firstName(): string {
         return this._firstName;
     }
 

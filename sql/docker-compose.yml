@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine   
+    container_name: postgres    
+    environment:
+      POSTGRES_USER: postgres
+    volumes:
+      - ./data:/var/lib/postgresql
+    ports:
+      - "5432:5432"     
+  pgAdmin:
+    image: dpage/pgadmin4
+    ports:
+      - "3000:80"       
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"

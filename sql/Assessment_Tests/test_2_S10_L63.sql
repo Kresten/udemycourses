@@ -1,1 +1,0 @@
--- Use the file test_2_exercises for this Assessment Test.

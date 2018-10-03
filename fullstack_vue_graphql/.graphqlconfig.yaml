@@ -1,0 +1,3 @@
+projects:
+  vue-graphql-app:
+    schemaPath: schema.graphql

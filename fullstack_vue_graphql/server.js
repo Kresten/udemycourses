@@ -1,7 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const path = require('path');
+const path = require('path'); 
 
 const filePath = path.join(__dirname, 'typeDefs.gql');
 const typeDefs = fs.readFileSync(filePath, 'utf-8');
@@ -20,7 +20,7 @@ mongoose
   .catch(err => console.error(err));
 
 mongoose.set('useCreateIndex', true);
-
+  
 const server = new ApolloServer({
   typeDefs,
   resolvers,

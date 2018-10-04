@@ -4,4 +4,6 @@ Exercises for the Udemy course [Full-Stack Vue with GraphQL - The Ultimate Guide
 
 ## Complaints
 
-I needed configuration files for vscode extensions (GQL), didn't really explain.
+* I needed configuration files for vscode extensions (GQL), didn't really explain.
+* Why no tests?
+* Really miss better file structuring, some talk about best practices.

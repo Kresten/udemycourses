@@ -8,6 +8,18 @@ const createToken = (user, secret, expiresIn) => {
 
 module.exports = {
   Query: {
+    getCurrentUser: async (_, args, { User, currentUser }) => {
+      if (!currentUser) {
+        return null;
+      }
+      const user = await User.findOne({
+        username: currentUser.username
+      }).populate({
+        path: 'favorites',
+        model: 'Post'
+      });
+      return user;
+    },
     getPosts: async (_, args, { Post }) => {
       const posts = await Post.find({})
         .sort({ createdDate: 'desc' })
@@ -33,7 +45,7 @@ module.exports = {
       }).save();
       return newPost;
     },
-    signinUser: async (_, { username, password }, { User }) => {
+    loginUser: async (_, { username, password }, { User }) => {
       const user = await User.findOne({ username });
       if (!user) {
         throw new Error('User not found');

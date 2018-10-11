@@ -8,6 +8,11 @@ import store from './store';
 import ApolloClient from 'apollo-boost';
 import VueApollo from 'vue-apollo';
 
+import FormAlert from './components/Shared/FormAlert';
+
+// Register Global Component
+Vue.component('form-alert', FormAlert);
+
 Vue.use(VueApollo);
 
 export const defaultClient = new ApolloClient({
@@ -35,6 +40,11 @@ export const defaultClient = new ApolloClient({
     if (graphQLErrors) {
       for (let err in graphQLErrors) {
         console.dir(err);
+        if (err.name === 'AuthenticationError') {
+          store.commit('setAuthError', err);
+          // now signout the user
+          store.dispatch('signoutUser');
+        }
       }
     }
   }

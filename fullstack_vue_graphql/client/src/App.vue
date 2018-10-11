@@ -1,7 +1,7 @@
 <template>
   <!-- This should be a style class -->
   <v-app style="background: #EEEEEE">
-    <!-- Side Navbar -->
+    <!-- Side Navbar (Extract to component :)) -->
     <v-navigation-drawer app temporary fixed v-model="sideNav">
       <v-toolbar color="secondary" dark flat>
         <v-toolbar-side-icon @click="toggleSideNav"></v-toolbar-side-icon>
@@ -21,6 +21,15 @@
           <v-list-tile-content>
             {{item.title}}
           </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile v-if="user" @click="handleSignoutUser">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-action>
+            Signout
+          </v-list-tile-action>
         </v-list-tile>
       </v-list>
 
@@ -56,8 +65,8 @@
           </v-badge>
         </v-btn>
 
-        <v-btn flat v-if="user">
-          <v-icon class="hidden-sm-only" left>axit_to_app</v-icon>
+        <v-btn flat v-if="user" @click="handleSignoutUser">
+          <v-icon class="hidden-sm-only" left>exit_to_app</v-icon>
           Signout
         </v-btn>
 
@@ -70,6 +79,20 @@
         <transition name="fade">
           <router-view/>
         </transition>
+
+        <!-- Auth Snackbar -->
+        <v-snackbar v-model="authSnackbar" color="success" :timeout='5000' bottom>
+          <v-icon class="mr-3">check_circle</v-icon>
+          <h3>You are now signed in!</h3>
+          <v-btn dark flat @click="authSnackbar = false">Close</v-btn>
+        </v-snackbar>
+
+        <!-- Auth Error Snackbar -->
+        <v-snackbar v-if="authError" v-model="authErrorSnackbar" color="warning" :timeout='5000' bottom>
+          <v-icon class="mr-3">cancel</v-icon>
+          <h3>{{authError.message}}</h3>
+          <v-btn dark flat to="/Login">Login</v-btn>
+        </v-snackbar>
 
       </v-container>
     </main>
@@ -84,14 +107,14 @@ export default {
   data() {
     return {
       sideNav: false,
+      authSnackbar: false,
+      authErrorSnackbar: false,
       links: [
         { icon: 'chat', title: 'Posts', link: '/posts' },
         { icon: 'lock_open', title: 'Login', link: '/login' },
         { icon: 'create', title: 'Sign Up', link: '/signup' }
-      ],      
-      nav_links: [
-        { icon: 'stars', title: 'Create Post', link: '/post/add' }
-      ],      
+      ],
+      nav_links: [{ icon: 'stars', title: 'Create Post', link: '/post/add' }],
       auth_links: [
         { icon: 'chat', title: 'Posts', link: '/posts' },
         { icon: 'stars', title: 'Create Post', link: '/post/add' },
@@ -99,8 +122,21 @@ export default {
       ]
     };
   },
+  watch: {
+    // we only want to show snackbar on initial login
+    user(newValue, oldValue) {
+      if (oldValue === null) {
+        this.authSnackbar = true;
+      }
+    },
+    authError(value) {
+      if (value !== null) {
+        this.authErrorSnackbar = true;
+      }
+    }
+  },
   computed: {
-    ...mapGetters(['user']),
+    ...mapGetters(['user', 'authError']),
     horizontalNavbarLinks() {
       if (this.user) {
         return this.nav_links;
@@ -115,6 +151,9 @@ export default {
     }
   },
   methods: {
+    handleSignoutUser() {
+      this.$store.dispatch('signoutUser');
+    },
     toggleSideNav() {
       this.sideNav = !this.sideNav;
     }

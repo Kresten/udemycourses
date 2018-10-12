@@ -28,8 +28,14 @@ module.exports = {
           model: 'User'
         });
       return posts;
-    }
-    ,
+    },
+    getPost: async (_, { postId }, { Post }) => {
+      const post = await Post.findOne({ _id: postId }).populate({
+        path: 'messages.messageUser',
+        model: 'User'
+      });
+      return post;
+    },
     infiniteScrollPosts: async (_, { pageNum, pageSize }, { Post }) => {
       let posts;
       if (pageNum === 1) {
@@ -65,6 +71,57 @@ module.exports = {
       }).save();
       return newPost;
     },
+    addPostMessage: async (_, { messageBody, userId, postId }, { Post }) => {
+      const newMessage = {
+        messageBody,
+        messageUser: userId,
+      }
+      const post = await Post.findOneAndUpdate(
+        // find the post by id
+        { _id: postId },
+        // push the message to the beginning of messages array - we move every message in order to the beginning, which reverses the array
+        { $push: { messages: { $each: [newMessage], $position: 0 } } },
+        // return fresh document after update
+        { new: true }
+      ).populate({
+        path: 'messages.messageUser',
+        model: 'User'
+      });
+      return post.messages[0];
+    },
+    likePost: async (_, { postId, username }, { Post, User }) => {
+      const post = await Post.findOneAndUpdate(
+        { _id: postId },
+        { $inc: { likes: 1 } },
+        { new: true }
+      );
+      const user = await User.findOneAndUpdate(
+        { username },
+        { $addToSet: { favorites: postId } },
+        { new: true }).populate({
+          path: 'favorites',
+          model: 'Post'
+        }
+        );
+      return { likes: post.likes, favorites: user.favorites };
+    },
+    // does the opposite of above, inc with -1 and pull instead of addToSet
+    unlikePost: async (_, { postId, username }, { Post, User }) => {
+      const post = await Post.findOneAndUpdate(
+        { _id: postId },
+        { $inc: { likes: -1 } },
+        { new: true }
+      );
+      const user = await User.findOneAndUpdate(
+        { username },
+        { $pull: { favorites: postId } },
+        { new: true }).populate({
+          path: 'favorites',
+          model: 'Post'
+        }
+        );
+      return { likes: post.likes, favorites: user.favorites };
+    },
     loginUser: async (_, { username, password }, { User }) => {
       const user = await User.findOne({ username });
       if (!user) {
@@ -74,7 +131,7 @@ module.exports = {
       if (!isValidPassword) {
         throw new Error('Invalid password');
       }
-      return { token: createToken(user, process.env.SECRET, '1hr') };
+      return { token: createToken(user, process.env.SECRET, '7hr') };
     },
     signupUser: async (_, { username, email, password }, { User }) => {
       const user = await User.findOne({ username });
@@ -86,7 +143,7 @@ module.exports = {
         email,
         password
       }).save();
-      return { token: createToken(newUser, process.env.SECRET, '1hr') };
+      return { token: createToken(newUser, process.env.SECRET, '7hr') };
     }
   }
 };

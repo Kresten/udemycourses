@@ -36,9 +36,15 @@ type PostsPage {
   hasMore: Boolean
 }
 
+type LikesFaves {
+  likes: Int
+  favorites: [Post]
+}
+
 type Query {
   getCurrentUser: User
   getPosts: [Post]
+  getPost(postId: ID!): Post!
   infiniteScrollPosts(pageNum: Int!, pageSize: Int!): PostsPage
 }
 
@@ -50,6 +56,9 @@ type Mutation {
     description: String!
     creatorId: ID!
   ): Post!
+  addPostMessage(messageBody: String!, userId: ID!, postId: ID!): Message!
+  likePost(postId: ID!, username: String!): LikesFaves!
+  unlikePost(postId: ID!, username: String!): LikesFaves!
   loginUser(username: String!, password: String!): Token
   signupUser(username: String!, email: String!, password: String!): Token
 }

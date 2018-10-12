@@ -59,8 +59,8 @@
 
         <v-btn flat to="/profile" v-if="user">
           <v-icon class="hidden-sm-only" left>account_box</v-icon>
-          <v-badge right color="blue darken-2">
-            <span slot="badge">1</span>
+          <v-badge right color="blue darken-2" :class="{'bounce': badgeAnimated}">
+            <span slot="badge" v-if="userFavorites.length">{{userFavorites.length}}</span>
             Profile
           </v-badge>
         </v-btn>
@@ -108,13 +108,17 @@ export default {
     return {
       sideNav: false,
       authSnackbar: false,
+      badgeAnimated: false,
       authErrorSnackbar: false,
       links: [
         { icon: 'chat', title: 'Posts', link: '/posts' },
         { icon: 'lock_open', title: 'Login', link: '/login' },
         { icon: 'create', title: 'Sign Up', link: '/signup' }
       ],
-      nav_links: [{ icon: 'stars', title: 'Create Post', link: '/post/add' }],
+      nav_links: [
+        { icon: 'chat', title: 'Posts', link: '/posts' },
+        { icon: 'stars', title: 'Create Post', link: '/post/add' }
+      ],
       auth_links: [
         { icon: 'chat', title: 'Posts', link: '/posts' },
         { icon: 'stars', title: 'Create Post', link: '/post/add' },
@@ -133,10 +137,16 @@ export default {
       if (value !== null) {
         this.authErrorSnackbar = true;
       }
+    },
+    userFavorites(value) {
+      if (value) {
+        this.badgeAnimated = true;
+        setTimeout(() => (this.badgeAnimated = false), 1000);
+      }
     }
   },
   computed: {
-    ...mapGetters(['user', 'authError']),
+    ...mapGetters(['user', 'authError', 'userFavorites']),
     horizontalNavbarLinks() {
       if (this.user) {
         return this.nav_links;
@@ -178,6 +188,29 @@ export default {
   /* Could also move in from left with (set transition-property: all;)
   transform: translateX(-25px);
   */
+}
+.bounce {
+  animation: bounce 1s both;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%,
+  43% {
+    transform: translate3d(0, -20px, 0);
+  }
+  70% {
+    transform: translate3d(0, -10px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
 }
 </style>
 

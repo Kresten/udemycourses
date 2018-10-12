@@ -10,8 +10,8 @@
       </v-dialog>
     </v-layout>
     <v-flex xs12>
-      <v-carousel v-if="!loading && posts.length > 0" v-bind="{ 'cycle': true }" interval="3000">
-        <v-carousel-item v-for="post in posts" :key="post._id" :src="post.imageUrl">
+      <v-carousel style="height:70vh" v-if="!loading && posts.length > 0" v-bind="{ 'cycle': true }" interval="3000">
+        <v-carousel-item @click.native="goToPost(post._id)" v-for="post in posts" :key="post._id" :src="post.imageUrl">
           <h1 id="carousel__title">{{post.title}}</h1>
         </v-carousel-item>
       </v-carousel>
@@ -28,7 +28,7 @@ export default {
   created() {
     this.handleGetCarouselPosts();
   },
-  computed: { 
+  computed: {
     ...mapGetters(['loading', 'posts'])
     /*
     To avoid all these getters in our components, we can use the more concise vuex mapGetters as above
@@ -44,6 +44,9 @@ export default {
     handleGetCarouselPosts() {
       this.$store.dispatch('getPosts');
       // reach out to Vuex store, fire action that gets posts for carousel
+    },
+    goToPost(postId) {
+      this.$router.push(`/posts/${postId}`);
     }
   }
 };

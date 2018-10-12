@@ -158,6 +158,7 @@ export default new Vuex.Store({
     user: state => state.user,
     loading: state => state.loading,
     error: state => state.error,
-    authError: state => state.authError
+    authError: state => state.authError,
+    userFavorites: state => state.user && state.user.favorites
   }
 });

@@ -61,6 +61,19 @@ export const INFINITE_SCROLL_POSTS = gql`
   }
 `;
 
+export const SEARCH_POSTS = gql`
+  query($searchTerm: String){
+    searchPosts(searchTerm: $searchTerm) {
+      _id
+      title
+      description
+      imageUrl
+      likes
+    }
+  }
+`;
+
+
 /* User Queries */
 
 export const GET_CURRENT_USER = gql`

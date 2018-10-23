@@ -33,12 +33,12 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-UserSchema.pre('save', function(next) {
-  this.avatar = `http://gravatar.com/avatat/${md5(this.username)}?d=identicon`;
+UserSchema.pre('save', function (next) {
+  this.avatar = `http://gravatar.com/avatar/${md5(this.username)}?d=identicon`;
   next();
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   if (!this.isModified('password')) {
     return next();
   }

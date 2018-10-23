@@ -46,7 +46,21 @@
       <v-spacer></v-spacer>
 
       <!-- Search input -->
-      <v-text-field flex prepend-icon="search" placeholder="Search posts" color="accent" single-line hide-details></v-text-field>
+      <v-text-field v-model="searchTerm" @input="handleSearchPosts"
+      flex prepend-icon="search" placeholder="Search posts" color="accent" single-line hide-details></v-text-field>
+
+      <v-card flexbox center dark v-if="searchResults.length" id="search__card">
+        <v-list>
+          <v-list-tile @click="goToSearchResult(result._id)" v-for="result in searchResults" :key="result._id">
+            <v-list-tile-title>
+              {{result.title}} -
+              <span class="font-weight-thin">{{formatDescription(result.description)}}</span>
+            </v-list-tile-title>
+            <v-list-tile-action v-if="checkIfUserFavorite(result._id)"></v-list-tile-action>
+            <v-icon>favorite</v-icon>
+          </v-list-tile>
+        </v-list>
+      </v-card>
 
       <v-spacer></v-spacer>
 
@@ -106,6 +120,7 @@ export default {
   name: 'App',
   data() {
     return {
+      searchTerm: '',
       sideNav: false,
       authSnackbar: false,
       badgeAnimated: false,
@@ -146,7 +161,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['user', 'authError', 'userFavorites']),
+    ...mapGetters(['user', 'authError', 'userFavorites', 'searchResults']),
     horizontalNavbarLinks() {
       if (this.user) {
         return this.nav_links;
@@ -161,11 +176,30 @@ export default {
     }
   },
   methods: {
+    formatDescription(desc) {
+      return desc.length > 30 ? `${desc.slice(0, 30)}...` : desc;
+    },
     handleSignoutUser() {
       this.$store.dispatch('signoutUser');
     },
     toggleSideNav() {
       this.sideNav = !this.sideNav;
+    },
+    handleSearchPosts() {
+      this.$store.dispatch('searchPosts', {
+        searchTerm: this.searchTerm
+      });
+    },
+    goToSearchResult(id) {
+      // clear search term
+      this.searchTerm = '';
+      this.$router.push(`/posts/${id}`);
+      this.$store.commit('clearSearchResults');
+    },
+    checkIfUserFavorite(id) {
+      return (
+        this.userFavorites && this.userFavorites.some(fave => fave._id === id)
+      );
     }
   }
 };
@@ -189,6 +223,15 @@ export default {
   transform: translateX(-25px);
   */
 }
+
+#search__card {
+  position: absolute;
+  width: 100vw;
+  z-index: 8;
+  top: 100%;
+  left: 0%;
+}
+
 .bounce {
   animation: bounce 1s both;
 }

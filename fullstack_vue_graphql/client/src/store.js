@@ -4,7 +4,19 @@ import router from './router';
 
 import { defaultClient as apolloClient } from './main';
 
-import { GET_CURRENT_USER, GET_POSTS, LOGIN_USER, SIGNUP_USER, ADD_POST, SEARCH_POSTS } from './queries';
+import {
+  GET_CURRENT_USER,
+  GET_POSTS,
+  LOGIN_USER,
+  SIGNUP_USER,
+  ADD_POST,
+  SEARCH_POSTS,
+  GET_USER_POSTS,
+  UPDATE_USER_POST,
+  DELETE_USER_POST,
+  INFINITE_SCROLL_POSTS
+} from './queries';
+import { POINT_CONVERSION_HYBRID } from 'constants';
 
 Vue.use(Vuex);
 
@@ -12,6 +24,7 @@ export default new Vuex.Store({
   state: {
     posts: [],
     user: null,
+    userPosts: [],
     loading: false,
     error: null,
     authError: null,
@@ -26,6 +39,9 @@ export default new Vuex.Store({
     },
     setUser: (state, payload) => {
       state.user = payload;
+    },
+    setUserPosts: (state, payload) => {
+      state.userPosts = payload;
     },
     clearUser: state => (state.user = null),
     clearError: state => (state.error = null),
@@ -57,6 +73,15 @@ export default new Vuex.Store({
           commit('setLoading', false);
           console.error(err);
         });
+    },
+    getUserPosts: ({ commit }, payload) => {
+      apolloClient
+        .query({
+          query: GET_USER_POSTS,
+          variables: payload
+        }).then(({ data }) => {
+          commit('setUserPosts', data.getUserPosts);
+        }).catch(err => console.error(err));
     },
     getPosts: ({ commit }) => {
       commit('setLoading', true);
@@ -110,7 +135,17 @@ export default new Vuex.Store({
             _id: -1,
             ...payload
           }
-        }
+        },
+        // rerun specified queries after performing the mutation in order to get fresh data
+        refetchQueries: [
+          {
+            query: INFINITE_SCROLL_POSTS,
+            variables: {
+              pageNum: 1,
+              pageSize: 2
+            }
+          }
+        ]
       })
         .then(({ data }) => {
           console.log(data);
@@ -118,6 +153,39 @@ export default new Vuex.Store({
         .catch((err) => {
           console.error(err);
         });
+    },
+    deleteUserPost: ({ state, commit }, payload) => {
+      apolloClient.mutate({
+        mutation: DELETE_USER_POST,
+        variables: payload
+      })
+        .then(({ data }) => {
+          const index = state.userPosts.findIndex(post => post._id === data.deleteUserPost._id);
+          // create new array up to the one we have updated, insert new one, +1 to index to skip old post
+          const userPosts = [
+            ...state.userPosts.slice(0, index),
+            ...state.userPosts.slice(index + 1)
+          ];
+          commit('setUserPosts', userPosts);
+        })
+        .catch(err => console.error(err));
+    },
+    updateUserPost: ({ state, commit }, payload) => {
+      apolloClient.mutate({
+        mutation: UPDATE_USER_POST,
+        variables: payload
+      })
+        .then(({ data }) => {
+          const index = state.userPosts.findIndex(post => post._id === data.updateUserPost._id);
+          // create new array up to the one we have updated, insert new one, +1 to index to skip old post
+          const userPosts = [
+            ...state.userPosts.slice(0, index),
+            data.updateUserPost,
+            ...state.userPosts.slice(index + 1)
+          ];
+          commit('setUserPosts', userPosts);
+        })
+        .catch(err => console.error(err));
     },
     signupUser: ({ commit }, payload) => {
       commit('clearError');
@@ -176,6 +244,7 @@ export default new Vuex.Store({
     loading: state => state.loading,
     error: state => state.error,
     authError: state => state.authError,
+    userPosts: state => state.userPosts,
     searchResults: state => state.searchResults,
     userFavorites: state => state.user && state.user.favorites
   }

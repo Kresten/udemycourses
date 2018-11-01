@@ -35,7 +35,7 @@
       <v-layout row wrap>
         <v-flex xs12 sm6 v-for="favorite in userFavorites" :key="favorite._id">
           <v-card class="mt-3 ml-1 mr-2" hover>
-            <v-img height="30vh" :src="favorite.imageUrl"></v-img>
+            <v-img @click="goToPost(favorite._id)" height="30vh" :src="favorite.imageUrl"></v-img>
             <v-card-text>{{favorite.title}}</v-card-text>
           </v-card>
         </v-flex>
@@ -65,7 +65,7 @@
             <v-btn color="error" floating fab small dark @click="handleDeleteUserPost(post)">
               <v-icon>delete</v-icon>
             </v-btn>
-            <v-img height="30vh" :src="post.imageUrl"></v-img>
+            <v-img @click="goToPost(post._id)" height="30vh" :src="post.imageUrl"></v-img>
             <v-card-text>{{post.title}}</v-card-text>
           </v-card>
         </v-flex>
@@ -168,6 +168,9 @@ export default {
     this.handleGetUserPosts();
   },
   methods: {
+    goToPost(id) {
+      this.$router.push(`/posts/${id}`);
+    },
     formatJoinDate(date) {
       return moment(new Date(date)).format('ll');
     },

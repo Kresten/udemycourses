@@ -16,7 +16,6 @@ import {
   DELETE_USER_POST,
   INFINITE_SCROLL_POSTS
 } from './queries';
-import { POINT_CONVERSION_HYBRID } from 'constants';
 
 Vue.use(Vuex);
 
@@ -44,7 +43,9 @@ export default new Vuex.Store({
       state.userPosts = payload;
     },
     clearUser: state => (state.user = null),
-    clearError: state => (state.error = null),
+    clearError: state => {
+      state.error = null
+    },
     clearSearchResults: state => (state.searchResults = []),
     setError: (state, payload) => {
       state.error = payload;
@@ -59,7 +60,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    getCurrentUser: ({ commit }) => {
+    getCurrentUser: ({ commit, dispatch }) => {
       commit('setLoading', true);
       apolloClient
         .query({
@@ -71,6 +72,7 @@ export default new Vuex.Store({
         })
         .catch(err => {
           commit('setLoading', false);
+          dispatch('signoutUser');
           console.error(err);
         });
     },

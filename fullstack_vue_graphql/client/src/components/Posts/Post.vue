@@ -76,7 +76,7 @@
               <v-divider :key="message._id"></v-divider>
               <v-list-tile avatar inset :key="message.title">
                 <v-list-tile-avatar>
-                  <img src="message.messageUser.avatar">
+                  <img :src="message.messageUser.avatar">
                 </v-list-tile-avatar>
 
                 <v-list-tile-content>
@@ -126,7 +126,8 @@ export default {
       messageRules: [
         message => !!message || 'A message is required',
         message =>
-          message.length < 75 || 'Message must be less than 75 characters'
+          (message && message.length < 75) ||
+          'Message must be less than 75 characters'
       ]
     };
   },
@@ -257,7 +258,6 @@ export default {
           })
           .then(({ data }) => {
             this.$refs.form.reset();
-            console.log(data.addPostMessage);
           })
           .catch(err => console.error(err));
       }

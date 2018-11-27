@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const createToken = (user, secret, expiresIn) => {
+function createToken(user, secret, expiresIn) {
   const { username, email } = user;
   return jwt.sign({ username, email }, secret, { expiresIn });
 };
